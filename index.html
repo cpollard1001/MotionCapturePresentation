@@ -1,0 +1,315 @@
+<html>
+  <head>
+    <title>IMU Based Motion Capture Suit</title>
+    <script src="resources/presentation.js"></script>
+    <link rel="stylesheet" type="text/css" href="resources/presentation.css">
+    <link rel="icon" type="image/png" href="resources/logo.png">
+  </head>
+  <body>
+
+<div style="display:none;">
+  <div id="home">
+    <div id="homeSpacing" style="height:23%"></div>
+    <h1 id="homeHeader">IMU Based Motion Capture Suit</h1>
+    <p class="homeNames">Chris Pollard</p>
+  </div>
+  <div id="demo">
+    <iframe id="demoIframe" width="560" height="315" src="https://www.youtube.com/embed/P0RDPwWLEew" frameborder="0" allowfullscreen></iframe>
+  </div>
+</div>
+
+<script>
+
+/*
+  tabName: name shown on the tab, used to create ID
+  title: title of the slide, required if innerHTML is set and you want a slide title
+  innerHTML: use if slide should be custom HTML
+  items: list of bullet points. Can also have object with item:string and items:[] properties for sub bullets
+*/
+var slideData = [
+  {
+    tabName: "Home",
+    title: "",
+    innerHTML: document.getElementById("home").innerHTML,
+  },
+  {
+    tabName: "Project Overview",
+    items: [
+      "Capture body motion using multiple inertial measurement units (IMUs)",
+      "Send results to computer using Bluetooth Low Energy (BLE)",
+      "Use animated character to visualize the captured data in real time",
+    ],
+    images: [
+      { tabName: "Diagram", url: "resources/suitdiagram.png", caption: "Eleven IMUs are placed throughout the body to capture different bone movements. Each has a preconfigured I2C address and orientation." },
+      { tabName: "Orientation Transformation", url: "resources/AxesDiagram.png", caption: "Two separate transformations are required to convert the axes from the IMU's coordinate system to the game engine's." },
+      { tabName: "Completed Suit", url: "resources/suit.png", caption: "This is an image of the completed suit. There is also a pushbutton extending toward the right hand which is not shown." }
+    ]
+  },
+  {
+    tabName: "Control Unit",
+    items:[ "Powered by a single 3.7 volt lithium-ion battery",
+    { 
+      item: "Uses a 3.3 volt linear regulator (MCP1700)",
+      items: [ "Supplies up to 250 milliamps", "Low-dropout voltage", "High stability" ]
+    },
+    "Contains the main controller board and the waist-level IMU",
+    "Pushbutton used for calibration and resetting",
+    "1.8K pull-up resistors for I2C communication with other PCBs"
+    ],
+    images: [
+      { tabName: "Schematic Diagram", url: "resources/ControlSchematic.PNG", caption: "The schematic diagram for the controller board." },
+      { tabName: "Finished Board", url: "resources/controller.png", caption: "An image of the completed controller." }
+    ]
+  },
+  {
+    tabName: "BLE Board",
+    items:[ "BLE system on a chip with GPIO broken out (nRF52832)", { item: "Development workflow", items: [ "Nordic software development kit", "Compiled using arm-gcc", "Programmed over Serial Wire Debug with J-Link" ] }, "PCB antenna and RF elements", "Powed by USB Micro adapter or 3.3 volts","Requests data from connected IMU Boards", "Sends IMU data and button presses to computer" ],
+    images: [
+      { tabName: "Schematic Diagram", url: "resources/dev-schematic.png", caption: "Schematic diagram for the BLE general purpose breakout board." },
+      { tabName: "Board Layout", url: "resources/dev-pcb.png", caption: "A screenshot of the PCB layout in Kicad. This shows the the pinout and RF elements." },
+      { tabName: "Unpopulated PCB", url: "resources/dev-bare.png", caption: "A bare printed circuit board received from Osh Park" },
+      { tabName: "Finished PCB", url: "resources/dev-populated.png", caption: "This is the fulldy populated BLE board created using the same method as above. Notice the six pin pad for programming." }
+    ]
+  },
+  {
+    tabName: "IMU Board",
+    items:[
+      { item: "ARM Cortex-M4 microprocessor (nRF52832)", items:[ "Uses Magdwick algorithm to compute orientation", "Slave for main controller", "Master to the IMU Board" ] },
+      { item: "Six axis integrated IMU (MPU6050)", items:[ "All communication and configuration through I2C", "Receive acceleration and rotational information" ] },
+      "Can be calibrated by I2C request from controller"
+    ],
+    images: [
+      { tabName: "Schematic Diagram", url: "resources/imu-schematic.png", caption: "The schematic for the IMU. It has an nRF52832 microprocessor and MPU6050 six axis intertial measurement unit." },
+      { tabName: "Board Layout", url: "resources/imu-pcb.png", caption: "A screenshot of the PCB layout in Kicad." },
+      { tabName: "Unpopulated PCB", url: "resources/imu-bare.png", caption: "A bare printed circuit board received from Osh Park" },
+      { tabName: "Finished PCB", url: "resources/imu-populated.png", caption: "This is the finished IMU printed circuit board. Solder was applied using a stencil, and a toaster oven was used to reflow the solder paste." }
+    ]
+  },
+  {
+    tabName: "Communication",
+    items: [
+      "Each IMU is an assigned an address 0x50 - 0x5A",
+      "BLE board requests current information from each IMU one at a time over I2C",
+      "BLE board builds and sends a packet to the PC every 15 milliseconds",
+      "I2C is used to calibrate the IMUs initially, to reset bones in software, and to get the orientation and acceleration values"
+    ],
+    images: [
+      { tabName: "Data Format", url: "resources/BLEcommunication.png", caption: "The three data formats sent from the BLE board to the PC" }
+    ]
+  },
+  {
+    tabName: "Visualization",
+    items:[
+      "Uses the Javascript WebGL library Three.js",
+      "Quaternion information (global rotations) from the IMUs is applied to the bones of the character",
+      "Bones are organized in a hierarchy such that each bone's global rotation is the product of every ancestor's local rotation",
+      "The local rotation of a bone is its global rotation times the conjugate of the parent's global"
+    ],
+    images: [
+      { tabName: "Bone Structure", url: "resources/skeleton.png", caption: "Character model showing the bone hierarchy" },
+      { tabName: "Screenshot", url: "resources/screenshot.png", caption: "Three.js rendering of the character model" }
+    ]
+  },
+  {
+    tabName: "Demo",
+    title: "Demo",
+    innerHTML: document.getElementById("demo").innerHTML,
+  },
+  {
+    tabName: "Additional Info",
+    items: [
+      {
+        item: "All files available on Georgia Tech's Github",
+        items: [ "Schematics", "PCB design files", "Firmware source code for each board","Visualization source code", "Presentation" ]
+      },
+      'This can be accessed at <a target=_blank class="Link" href=https://github.gatech.edu/cpollard7/IMU-Motion-Capture-Suit >https://github.gatech.edu/cpollard7/IMU-Motion-Capture-Suit</a>'
+    ],
+  },
+  {
+    tabName: "Future Work",
+    items:[ "Figure better way to do calibration", "Better wire management", "Use accelerometer readings for dead reckoning or jump detection", "Fix strange rotations after a reset" ],
+  },
+];
+
+var tabActiveIndex = 0;
+
+var wrapper = new UI.Panel().setClass( "wrapper" );
+document.body.appendChild( wrapper.dom );
+
+var sidebar = new UI.Panel().setClass( "sidebar" );
+var slideArea = new UI.Panel().setClass( "slideArea" );
+var empty = new UI.Panel().setClass( "empty" );
+
+wrapper.add( sidebar );
+wrapper.add( slideArea );
+wrapper.add( empty );
+
+var resizeImage = function( index ){
+  if( typeof index != "number" ) index = tabActiveIndex;
+
+  var img = slides[ index ].image;
+
+  if( img == undefined ) return;
+
+  var width = img.dom.width;
+  var height = img.dom.height;
+
+  var parent = slides[ index ].slide;
+
+  var parentWidth = parent.dom.offsetWidth - 100;
+  var parentHeight = Math.round(parent.dom.offsetHeight * 0.6) ;
+
+  var aspect = width / height;
+  if( aspect > parentWidth/parentHeight ){
+    // limit width
+    img.setWidth( parentWidth + "px" );
+    img.setHeight( parentWidth / aspect + "px" );
+  } else {
+    // limit height
+    img.setWidth( parentHeight * aspect + "px" );
+    img.setHeight( parentHeight + "px" );
+  }
+
+}
+
+var setActive = function( newIndex ){
+
+  slides[ tabActiveIndex ].tab.makeInactive();
+  slides[ newIndex ].tab.makeActive();
+  
+  slides[ tabActiveIndex ].slide.makeInactive();
+  slides[ newIndex ].slide.makeActive();
+
+  slides[ tabActiveIndex ].subtab.setDisplay( "none" );
+  slides[ newIndex ].subtab.setDisplay( "block" );
+
+  location.href = "#" + slides[ newIndex ].id;  
+
+  tabActiveIndex = newIndex;
+
+  resizeImage( newIndex );
+
+};
+
+var slides = [];
+
+var addSlide = function( slideObj ){
+
+  // calculate ID name
+  slideObj.id = Utils.makeID( slideObj.tabName );
+
+  // add tab
+  var tab = new UI.Tab( slideObj.tabName );
+  tab.index = slides.length;
+  tab.onClick(function(){
+    setActive( this.index );
+  });
+  slideObj.tab = tab;
+
+  // create new panel for slide
+  var slide = new UI.Slide( slideObj.title != undefined ? slideObj.title : slideObj.tabName );
+
+  if( slideObj.innerHTML ){
+    if( slideObj.title ){
+      slide.content.dom.innerHTML = slideObj.innerHTML;
+    }else{
+      slide.dom.innerHTML = slideObj.innerHTML;
+    }
+  }
+
+  if( slideObj.items ){
+
+    var ul = new UI.Ul( slideObj.items );
+    ul.setMarginTop( "50px" );
+    slide.content.add( ul );
+
+  }
+
+  slideObj.slide = slide;
+  slideArea.add( slide );
+
+  slides.push( slideObj );
+
+};
+
+var addNormalSlide = function( slideObj ){
+
+  addSlide( slideObj );
+
+  sidebar.add( slideObj.tab );
+
+  slideObj.subtab =new UI.Panel().setClass( "Subtab" );
+  slideObj.subtab.setDisplay( "none" );
+  sidebar.add( slideObj.subtab );
+
+};
+
+var addImageSlide = function( slideObj, img ){
+
+  addSlide( img );
+  img.tab.setMarginLeft( "40px" );
+  img.subtab = slideObj.subtab;
+
+  var image = new UI.Image( img.url );
+  image.setDisplay( "block" ).setMarginLeft("auto").setMarginRight("auto");
+
+  img.slide.content.add( image );
+
+  var caption = new UI.Panel().setClass( "Caption" );
+
+  caption.setTextContent( img.caption );
+  caption.setPaddingTop( "20px" );
+  caption.setHeight( "40%" ).setWidth( "80%" );
+  caption.setDisplay('block').setMarginRight('auto').setMarginLeft('auto');
+  caption.setTextAlign( "center" );
+
+  img.image = image;
+
+  image.dom.onload = function(){
+    resizeImage( img.tab.index );
+  };
+
+  img.slide.content.add( caption );
+  slideObj.subtab.add( img.tab );
+
+};
+
+for( var i = 0; i < slideData.length; i++ ){
+
+  var slideObj = slideData[i];
+
+  addNormalSlide( slideObj );
+
+  if( slideObj.images ){
+    for( var j = 0; j < slideObj.images.length; j++ ){
+      addImageSlide( slideObj, slideObj.images[j] );
+    }
+  }
+
+};
+
+document.onkeydown = function( e ){
+  if( e.keyCode == '37' ){ // left
+    if( tabActiveIndex > 0 ) setActive( tabActiveIndex - 1 );
+  } else if ( e.keyCode == '39' ){ // right
+    if( tabActiveIndex < slides.length - 1 ) setActive( tabActiveIndex + 1 )
+  }
+};
+
+var id = window.location.hash.substring(1);
+if( id ){
+  for( var i = 0; i < slides.length; i++ ){
+    if( slides[i].id == id ){
+      setActive( i );
+      break;
+    }
+  }
+} else {
+  setActive( tabActiveIndex );
+}
+
+window.addEventListener( 'resize', resizeImage );
+
+</script>
+  </body>
+</html>

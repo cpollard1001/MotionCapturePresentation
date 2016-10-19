@@ -1,0 +1,122 @@
+body {
+  margin: 0px;
+  background-color: #222222;
+  color: #ecf0f1;
+  overflow: hidden;
+  font-family: "Arial", Sans-serif;
+  font-size: 16px;
+}
+
+.wrapper {
+  width: 100%;
+  max-width: 1200px;
+  height: 100%;
+  margin: 0 auto;
+  background-color: #222222;
+}
+
+.sidebar {
+  width: 200px;
+  height: 100%;
+  position: relative;
+  display: inline-block;
+  float: left;
+  padding-top: 10%;
+  background-color: #222222;
+}
+
+.slideArea {
+  width: calc( 100% - 400px );
+  height: 90%;
+  position: relative;
+  display: inline-block;
+  float: left;
+  margin-top: 4%;
+  background-color: #333333;
+  border-radius: 10px;
+}
+
+.empty {
+  width: 200px;
+  height: 100%;
+  float: left;
+  position: relative;
+  display:inline-block;
+}
+
+.Tab {
+  margin-left: 20px;
+  padding: 5px;
+  cursor: pointer;
+}
+
+.Tab:before {
+  content: ' \25CF';
+  font-size: 10px;
+  top: -2px;
+  right: 5px;
+  position: relative;
+}
+
+.Slide {
+  position: absolute;
+  height: 100%;
+  width: calc( 100% - 100px );
+  padding: 50px;
+}
+
+.Header {
+  font-size: 35px;
+  text-align: center;
+}
+
+.Ul {
+  font-size: 20px;
+}
+
+.Li {
+  margin-top: 20px;
+}
+
+.Image {
+  border-radius: 5px;
+}
+
+.Button:focus { outline: 0; }
+
+#homeHeader {
+  text-align: center;
+  font-size: 2.5em;
+}
+
+.homeNames {
+  text-align: center;
+  font-size: 1.3em;
+}
+
+#demoIframe {
+  display: block;
+  margin-left: 0;
+  margin-right: 0;
+  width: 100%;
+}
+
+.Link {
+  color: white;
+  text-decoration: none;
+}
+
+.Link:visited {
+  color: white;
+  text-decoration: none;
+}
+
+.Link:hover {
+    color: white;
+    text-decoration: none;
+}
+
+.Link:active {
+    color: white;
+    text-decoration: none;
+}
